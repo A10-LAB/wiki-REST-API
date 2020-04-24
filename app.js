@@ -26,11 +26,13 @@ const articleSchema =
 // DB Модель
 const Article = mongoose.model("Article", articleSchema);
 
-// ******* Ядро - get/post
-// GET через все коллекции
-app.get("/articles", function(req, res)
+// ******* Ядро - get/post 1) метод route, используя express 2) закомментированные - простое перечисление запросов.
+
+// 1) метод route из express
+app.route("/articles")
+
+.get(function(req, res)
 {
-    // Пустые параметры поиска, потому что поиск всех объектов
     Article.find(function(err, foundArticles)
     {
         if(!err)
@@ -38,11 +40,9 @@ app.get("/articles", function(req, res)
         else
         {res.send(err);}
     });
-});
+})
 
-// POST через все коллекции исходя из требований конвенции о наименованиях
-// Вместо name, которые были бы в форме - в каждом инпуте и по которым была бы связь с методом post используется парсер по соответстующему свойству
-app.post("/articles", function(req, res)
+.post(function(req, res)
 {
     // Создание нового документа-схемы в БД
     const newArticle = new Article
@@ -52,14 +52,18 @@ app.post("/articles", function(req, res)
     });
     newArticle.save(function(err)
     {
-        if(!err){res.send("/// app.post to create newArticle completed ///")} 
-        else {res.send(err);
-    }
+        if(!err)
+        {
+            res.send("/// app.post to create newArticle completed ///");
+        } 
+        else 
+        {
+            res.send(err);
+        }
 });
-});
+})
 
-// Запрос на DELETE
-app.delete("/articles", function (req, res)
+.delete(function (req, res)
 {
 Article.deleteMany(function(err)
 {
@@ -74,7 +78,56 @@ Article.deleteMany(function(err)
 });
 });
 
+// 2) перечисление запросов
+// GET через все коллекции
+// app.get("/articles", function(req, res)
+// {
+//     // Пустые параметры поиска, потому что поиск всех объектов
+//     Article.find(function(err, foundArticles)
+//     {
+//         if(!err)
+//         {res.send(foundArticles);}
+//         else
+//         {res.send(err);}
+//     });
+// });
+
+// POST через все коллекции исходя из требований конвенции о наименованиях
+// Вместо name, которые были бы в форме - в каждом инпуте и по которым была бы связь с методом post используется парсер по соответстующему свойству
+// app.post("/articles", function(req, res)
+// {
+//     // Создание нового документа-схемы в БД
+//     const newArticle = new Article
+//     ({
+//         title: req.body.title,
+//         content: req.body.content 
+//     });
+//     newArticle.save(function(err)
+//     {
+//         if(!err){res.send("/// app.post to create newArticle completed ///")} 
+//         else {res.send(err);
+//     }
+// });
+// });
+
+// Запрос на DELETE
+// app.delete("/articles", function (req, res)
+// {
+// Article.deleteMany(function(err)
+// {
+//     if (!err)
+//     {
+//         res.send("/// app.delete to delete all Article completed ///");
+//     }
+//     else 
+//     {
+//         res.send(err);
+//     }
+// });
+// });
+
 // ******* Контроль запуска сервера
-app.listen(3000, function() {
+app.listen(3000, function() 
+{
     console.log("Server started on port 3000");
 });
