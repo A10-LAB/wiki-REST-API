@@ -15,20 +15,25 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
 // ******* Mongo DB 
+
 // Соединение
-mongoose.connect("mongodb://localhost:27017/wikiDb", { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect("mongodb://localhost:27017/wikiDB", { useNewUrlParser: true, useUnifiedTopology: true });
+
 // DB Схема
 const articleSchema = 
 {
     title: String,
     content: String
 };
+
 // DB Модель
 const Article = mongoose.model("Article", articleSchema);
 
-// ******* Ядро - get/post 1) метод route, используя express 2) закомментированные - простое перечисление запросов.
+// ******* Ядро - get/post 
 
-// 1) метод route из express
+// Для всех articles: 1) метод route, используя express 2) закомментированные - простое перечисление запросов.
+
+// 1) метод route из express 
 app.route("/articles")
 
 .get(function(req, res)
@@ -126,6 +131,80 @@ Article.deleteMany(function(err)
 // });
 // });
 
+// ******* Для специфичных articles (2го уровня)
+// Используется express для определения параметра какая конкретно статья будет работать, через переменную articleTitle. Она образуется автоматически
+// Если localhost: 3000/articles/jquery
+// то он определяет переменную автоматически req.params.articleTitle = jquery
+// поэтому можно писать app.route("/articles/:articleTitle") и express будет определять ее самостоятельно
+
+app.route("/articles/:articleTitle")
+.get(function(req, res)
+{
+    Article.findOne({title: req.params.articleTitle}, function (err, foundArticle)
+    {
+        if(findArticle)
+        {
+            res.send(foundArticle);
+        }
+        else
+        {
+            res.send("/// No articles matching than title was found ///");
+        }
+    });
+})
+
+.put(function(req, res)
+{
+    Article.update(
+    {title: req.params.articleTitle},
+    {title: req.body.title, content: req.body.content},
+    {overwrite: true},
+    function(err)
+    {
+        if(!err)
+        {
+            res.send("/// Updating Article completed ///");
+        }
+        else
+        {
+            res.send(err);
+        } 
+    });
+})
+
+.patch(function(req, res)
+{
+Article.update(
+    {title: req.params.articleTitle},
+    {$set: req.body},
+    function(err)
+    {
+        if(!err)
+        {
+            res.send("/// Patching Article completed ///");
+        }
+        else
+        {
+            res.send(err);
+        } 
+    });
+})
+
+.delete(function(req, res)
+{ 
+    Article.deleteOne(
+    {title: req.params.articleTitle},
+        function(err)
+        {if (!err)
+        {
+            res.send("/// Deleting Article completed ///");
+        }
+        else 
+        {
+            res.send(err);
+        }
+    });
+});
 // ******* Контроль запуска сервера
 app.listen(3000, function() 
 {
